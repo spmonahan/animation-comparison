@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVG animation</title>
+  <style>
+    :root {
+      --page-padding: 24px;
+      --bg-color: white;
+      --theme-100: #fff1e6;
+      --theme-200: #ffebd4;
+      --theme-300: #ffe4c4;
+      --theme-400: #ffddb4;
+      --open-curve: cubic-bezier(0.75, 0, 0.25, 1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1f1f1f;
+        --theme-100: #c8913e;
+        --theme-200: #bc8634;
+        --theme-300: #b68130;
+        --theme-400: #a57221;
+      }
+    }
+
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: var(--page-padding);
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #container {
+      width: 480px;
+      height: 480px;
+      background-color: var(--bg-color);
+      display: block;
+    }
+
+    #fold-clip {
+      translate: 96px 48px;
+      rotate: 0deg;
+      opacity: 1;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: rotate 1s cubic-bezier(0.25, 1.5, 0.5, 1),
+        translate 1s cubic-bezier(0.4, 1, 0.4, 1), opacity 500ms linear;
+    }
+
+    #fold-clip-rect {
+      height: 384px;
+      y: 0px;
+      rx: 24px;
+      ry: 24px;
+      transition: height 1s var(--open-curve) 500ms,
+        y 1s var(--open-curve) 500ms,
+        rx 1s var(--open-curve) 500ms,
+        ry 1s var(--open-curve) 500ms;
+    }
+
+    #page {
+      width: 288px;
+      height: 384px;
+      fill: var(--theme-200);
+      rx: 24px;
+      ry: 24px;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scale(1.5);
+      opacity: 0;
+      transition: height 1s var(--open-curve) 500ms,
+        transform 0.5s cubic-bezier(0.5, 0, 0.75, -0.34) 13.5s,
+        opacity 0.25s linear 13.75s;
+    }
+
+    #page-top {
+      width: 288px;
+      height: 144px;
+      y: -144px;
+      rx: 24px;
+      ry: 24px;
+      fill: url(#pageTopGradient);
+      opacity: 0;
+      filter: drop-shadow(0px 0px 0px rgba(0, 0, 0, 0));
+      transition: y 1s var(--open-curve) 500ms,
+        filter 1s var(--open-curve) 500ms,
+        opacity 10ms linear 13.5s;
+    }
+
+    .line-background {
+      fill: var(--theme-400);
+    }
+
+    .line-shine {
+      fill: url(#shineGradient);
+      opacity: 0.25;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: translateX(-100%);
+      rotate: 45deg;
+    }
+
+    .line {
+      transform-box: fill-box;
+      transform-origin: top center;
+      transform: translateY(0);
+      transition: transform 1s var(--open-curve) 500ms;
+    }
+
+    .gradient-theme-start {
+      stop-color: var(--theme-100);
+    }
+
+    .gradient-theme-end {
+      stop-color: var(--theme-300);
+    }
+
+    .shine-stop-transparent {
+      stop-color: var(--bg-color);
+      stop-opacity: 0;
+    }
+
+    .shine-stop-opaque {
+      stop-color: var(--bg-color);
+      stop-opacity: 1;
+    }
+
+    @keyframes loading {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    body.reset #page-top,
+    body.reset #page,
+    body.reset #fold-clip,
+    body.reset #fold-clip-rect,
+    body.reset .line,
+    body.reset .line-shine {
+      transition: none;
+      animation: none;
+    }
+
+    body.start #fold-clip {
+      rotate: -40deg;
+      translate: 96px 152px;
+      opacity: 0;
+    }
+
+    body.start #fold-clip-rect {
+      height: 192px;
+    }
+
+    body.start #page {
+      height: 192px;
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    body.start #page-top {
+      y: 0px;
+      filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.12));
+      opacity: 1;
+    }
+
+    body.start .line {
+      transform: translateY(-192px);
+    }
+
+    body.start .line-shine {
+      transform: translateX(-100%);
+    }
+
+    body.running .line-shine {
+      animation: 2s linear 6 loading 1.5s both;
+    }
+  </style>
+</head>
+
+<body class="start">
+  <svg id="container" width="480" height="480" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg"
+    role="img" aria-labelledby="animation-title">
+    <title id="animation-title">SVG loading animation</title>
+    <defs>
+      <clipPath id="foldClipPath">
+        <rect id="fold-clip-rect" width="288" height="384" rx="24" ry="24"></rect>
+      </clipPath>
+      <linearGradient id="pageTopGradient" x1="0" y1="0" x2="288" y2="144" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" class="gradient-theme-start" />
+        <stop offset="100%" class="gradient-theme-end" />
+      </linearGradient>
+      <linearGradient id="shineGradient" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+        <stop offset="0%" class="shine-stop-transparent" />
+        <stop offset="40%" class="shine-stop-opaque" />
+        <stop offset="60%" class="shine-stop-opaque" />
+        <stop offset="100%" class="shine-stop-transparent" />
+      </linearGradient>
+      <clipPath id="line-clip-1">
+        <rect x="24" y="48" width="108" height="24" rx="12" ry="12"></rect>
+      </clipPath>
+      <clipPath id="line-clip-2">
+        <rect x="24" y="96" width="168" height="24" rx="12" ry="12"></rect>
+      </clipPath>
+      <clipPath id="line-clip-3">
+        <rect x="24" y="168" width="240" height="24" rx="12" ry="12"></rect>
+      </clipPath>
+      <clipPath id="line-clip-4">
+        <rect x="24" y="216" width="240" height="24" rx="12" ry="12"></rect>
+      </clipPath>
+      <clipPath id="line-clip-5">
+        <rect x="24" y="264" width="240" height="24" rx="12" ry="12"></rect>
+      </clipPath>
+      <clipPath id="line-clip-6">
+        <rect x="24" y="312" width="240" height="24" rx="12" ry="12"></rect>
+      </clipPath>
+    </defs>
+
+    <g id="fold-clip" clip-path="url(#foldClipPath)">
+      <rect id="page" x="0" y="0" width="288" height="384" rx="24" ry="24"></rect>
+
+      <g class="line line-1" clip-path="url(#line-clip-1)">
+        <rect class="line-background" x="24" y="48" width="108" height="24" rx="12" ry="12"></rect>
+        <rect class="line-shine" x="-216" y="-216" width="480" height="480"></rect>
+      </g>
+
+      <g class="line line-2" clip-path="url(#line-clip-2)">
+        <rect class="line-background" x="24" y="96" width="168" height="24" rx="12" ry="12"></rect>
+        <rect class="line-shine" x="-216" y="-216" width="480" height="480"></rect>
+      </g>
+
+      <g class="line line-3" clip-path="url(#line-clip-3)">
+        <rect class="line-background" x="24" y="168" width="240" height="24" rx="12" ry="12"></rect>
+        <rect class="line-shine" x="-216" y="-216" width="480" height="480"></rect>
+      </g>
+
+      <g class="line line-4" clip-path="url(#line-clip-4)">
+        <rect class="line-background" x="24" y="216" width="240" height="24" rx="12" ry="12"></rect>
+        <rect class="line-shine" x="-216" y="-216" width="480" height="480"></rect>
+      </g>
+
+      <g class="line line-5" clip-path="url(#line-clip-5)">
+        <rect class="line-background" x="24" y="264" width="240" height="24" rx="12" ry="12"></rect>
+        <rect class="line-shine" x="-216" y="-216" width="480" height="480"></rect>
+      </g>
+
+      <g class="line line-6" clip-path="url(#line-clip-6)">
+        <rect class="line-background" x="24" y="312" width="240" height="24" rx="12" ry="12"></rect>
+        <rect class="line-shine" x="-216" y="-216" width="480" height="480"></rect>
+      </g>
+
+      <rect id="page-top" x="0" y="-144" width="288" height="144" rx="24" ry="24"></rect>
+    </g>
+  </svg>
+
+  <script>
+    window.onload = () => {
+      const pageEl = document.querySelector("#page");
+
+      // Set up loop
+      pageEl.addEventListener("transitionend", (event) => {
+        if (event.propertyName === "opacity") {
+          document.body.classList.remove("running");
+          document.body.classList.add("reset", "start");
+          setTimeout(() => {
+            document.body.classList.remove("reset", "start");
+            document.body.classList.add("running");
+          }, 10);
+        }
+      });
+
+      // Start the animation
+      document.body.classList.remove("start");
+      document.body.classList.add("running");
+    };
+  </script>
+</body>
+
+</html>
